@@ -1,0 +1,32 @@
+#!/bin/bash
+echo -e "Enter the IP address of the machine." 
+read IP #This reads the user input and stores it into a variable (The variable is named 'IP' in this instance)
+echo -e "\nRunning an all port TCP scan on the chosen IP address:"
+echo -e "______________________________________________________________________________________________________"
+nmap -p- -v -T4 --min-rate 3000 -Pn --open $IP
+echo -e "______________________________________________________________________________________________________"
+echo -e "\nStoring any ports found in variables for the next command."
+
+open_ports=$(nmap -p- --open -T4 "$IP" | grep "open" | awk '{print $1}' | sed 's/\/tcp//g' | tr '\n' ',' | sed 's/,$//') #Stores the ports found from the original port scan.
+# Check if open_ports is not empty
+if [ -z "$open_ports" ]; then
+    echo "No open TCP ports found."
+else
+    echo "Now running the default scripts and version scan on the open TCP ports:"
+    echo -e "______________________________________________________________________________________________________"
+    nmap -sCV -p $open_ports $IP
+fi
+
+echo -e "______________________________________________________________________________________________________"
+echo "Now running default UDP scan on the IP address. This will require root privileges."
+nmap -sU -v -T4 --min-rate 3000 $IP --open
+echo -e "______________________________________________________________________________________________________"
+echo -e "\nStoring any ports found in variables for the next command."
+open_udp_ports=$(nmap -sU -v -T4 --min-rate 3000 "$IP" | grep "open" | awk '{print $1}' | sed 's/\/tcp//g' | tr '\n' ',' | sed 's/,$//')
+if [ -z "$open_ports" ]; then
+    echo "No open UDP ports found."
+else
+    echo "Now running the default scripts and version scan on the open UDP ports:"
+    echo -e "______________________________________________________________________________________________________"
+    nmap -sU -sCV -p $open_ports $IP
+fi

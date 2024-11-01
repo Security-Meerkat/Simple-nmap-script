@@ -23,10 +23,10 @@ nmap -sU -v -T4 --min-rate 3000 $IP --open
 echo -e "______________________________________________________________________________________________________"
 echo -e "\nStoring any ports found in variables for the next command."
 open_udp_ports=$(nmap -sU -v -T4 --min-rate 3000 "$IP" | grep "open" | awk '{print $1}' | sed 's/\/tcp//g' | tr '\n' ',' | sed 's/,$//')
-if [ -z "$open_ports" ]; then
+if [ -z "$open_udp_ports" ]; then
     echo "No open UDP ports found."
 else
     echo "Now running the default scripts and version scan on the open UDP ports:"
     echo -e "______________________________________________________________________________________________________"
-    nmap -sU -sCV -p $open_ports $IP
+    nmap -sU -sCV -p $open_udp_ports $IP
 fi
